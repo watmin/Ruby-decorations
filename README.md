@@ -54,8 +54,8 @@ end
 
 app = Application.new
 app.perform_task
-# => [2019-10-31 02:00:31 -0700] LoggingDecorator.perform_task was called
-# => [2019-10-31 02:00:31 -0700] LoggingDecorator.perform_task has finished
+# => [2019-10-31 02:00:31 -0700] Application.perform_task was called
+# => [2019-10-31 02:00:31 -0700] Application.perform_task has finished
 # => 4
 ```
 

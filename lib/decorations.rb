@@ -44,7 +44,7 @@ module Decorations
   #
   #   demo = Demo.new
   #   demo.demo_method
-  #   # => 'DecoratorDemo' has 'demo_method' decorated
+  #   # => 'Demo' has 'demo_method' decorated
   #   # => am I decorated?
   #
   # @api public
