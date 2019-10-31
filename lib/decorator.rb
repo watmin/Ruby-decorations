@@ -63,7 +63,7 @@ class Decorator
     next_caller = chain.shift
 
     if next_caller.nil?
-      @decorated_method.bind(this).call(*args)
+      decorated_method.bind(this).call(*args)
     else
       next_caller.call(this, chain, *args)
     end

@@ -89,7 +89,7 @@ module Decorations
     class_eval <<-RUBY_EVAL, __FILE__, __LINE__ + 1
       def #{name}(*args, &blk)
         chain = self.class.decorated_methods[#{name.inspect}].dup
-        chain.first.call_next(self, chain, *args, &blk)
+        Decorator.new(self, :method_added).call_next(self, chain, *args, &blk)
       end
     RUBY_EVAL
   end
