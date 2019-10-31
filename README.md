@@ -1,6 +1,6 @@
 # Decorations
 
-Python like decorators for Ruby
+Python like decorators for Ruby. Inspired by Rack and previous attempts at decorations
 
 ## Installation
 
@@ -20,7 +20,40 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Create a class that will have decorated methods and create decator classes to before actions.
+
+The decorator class must:
+* implement #call
+* must invoke call\_next(this, chain, \*args)
+* must return the result of call\_next.
+
+```ruby
+require 'decorations'
+
+class LoggingDecorator < Decorator
+  def call(this, chain, *args)
+    puts "[#{Time.now}] #{decorated_class}.#{decorated_method.name} was called"
+    result = call_next(this, chain, *args)
+    puts "[#{Time.now}] #{decorated_class}.#{decorated_method.name} has finished"
+    result
+  end
+end
+
+class Application
+  extend Decorations
+
+  decorate LoggingDecorator
+  def perform_task
+    2 + 2
+  end
+end
+
+app = Application.new
+app.perform_task
+# => [2019-10-31 02:00:31 -0700] LoggingDecorator.perform_task was called
+# => [2019-10-31 02:00:31 -0700] LoggingDecorator.perform_task has finished
+# => 4
+```
 
 ## Development
 

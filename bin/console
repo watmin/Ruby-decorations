@@ -1,14 +1,26 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
-require "decorations"
+require 'bundler/setup'
+require 'decorations'
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
 
-# (If you use this, don't forget to add pry to your Gemfile!)
-# require "pry"
-# Pry.start
+class DecoratorDemo < Decorator
+  def call(this, chain, *args)
+    puts "'#{decorated_class}' has '#{decorated_method.name}' decorated"
+    call_next(this, chain, *args)
+  end
+end
 
-require "irb"
-IRB.start(__FILE__)
+class Demo
+  extend Decorations
+
+  decorate DecoratorDemo
+  def demo_method
+    puts 'am I decorated?'
+  end
+end
+
+require 'pry'
+Pry.start
