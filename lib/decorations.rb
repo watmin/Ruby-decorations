@@ -67,7 +67,7 @@ module Decorations
   # @api private
   def append_decorations(name, decorators, decorated_methods)
     decorators.each do |klass, args|
-      decorated_methods[name] << klass.new(klass, instance_method(name), *args)
+      decorated_methods[name] << klass.new(self, instance_method(name), *args)
     end
   end
 
