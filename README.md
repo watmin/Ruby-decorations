@@ -1,5 +1,9 @@
 # Decorations
 
+[![Gem Version](https://badge.fury.io/rb/decorations.svg)](https://badge.fury.io/rb/decorations)
+[![Build Status](https://travis-ci.org/watmin/Ruby-decorations.svg?branch=master)](https://travis-ci.org/watmin/Ruby-decorations)
+[![Coverage Status](https://coveralls.io/repos/github/watmin/Ruby-decorations/badge.svg?branch=master)](https://coveralls.io/github/watmin/Ruby-decorations?branch=master)
+
 Python like decorators for Ruby. Inspired by Rack and previous attempts at decorations
 
 ## Installation
