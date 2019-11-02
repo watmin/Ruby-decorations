@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 require 'decorations'
+require 'decorators/all'
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
@@ -40,6 +41,28 @@ class Demo
   def demo_kwargs(first: 1, second: nil)
     puts "first is #{first}"
     puts "second is #{second}"
+  end
+end
+
+
+class HasIssues
+  extend Decorations
+
+  def initialize(starting_value)
+    @starting_value = starting_value
+  end
+
+  decorate RetryDecorator, tries: 3, backoff: true
+  def do_thing
+    loop do
+      @starting_value += 1
+      break if @starting_value % 3 == 0
+
+      raise StandardError, 'something is wrong'
+    end
+
+    puts 'it works'
+    9
   end
 end
 

@@ -17,7 +17,9 @@ module DecoratorDsl
     class << receiver
       private
 
-      attr_accessor :before_method, :before_set, :after_method, :after_set
+      attr_accessor :before_method, :before_set,
+                    :after_method, :after_set,
+                    :around_method, :around_set
     end
   end
 
@@ -29,7 +31,7 @@ module DecoratorDsl
   # @example
   #   class DecoratorDemo < Decorator
   #     before :print_message
-  #     def print_message(this, chain, *args)
+  #     def print_message
   #       puts "'#{decorated_class}' has '#{decorated_method.name}' decorated"
   #     end
   #   end
@@ -62,7 +64,7 @@ module DecoratorDsl
   # @example
   #   class DecoratorDemo < Decorator
   #     after
-  #     def print_message(this, chain, *args)
+  #     def print_message
   #       puts "'#{decorated_class}' has '#{decorated_method.name}' decorated"
   #     end
   #   end
@@ -87,6 +89,41 @@ module DecoratorDsl
     @after_set = true
   end
 
+  ##
+  # Adds the next method to be hook into executing around decorated method
+  #
+  # @return [Void]
+  #
+  # @example
+  #   class DecoratorDemo < Decorator
+  #     around
+  #     def print_message
+  #       puts "'#{decorated_class}' has '#{decorated_method.name}' decorated"
+  #       yield
+  #       puts "'#{decorated_class}' has '#{decorated_method.name}' decorated"
+  #     end
+  #   end
+  #
+  #   class Demo
+  #     extend Decorations
+  #
+  #     decorate DecoratorDemo
+  #     def demo_method
+  #       puts 'am I decorated?'
+  #     end
+  #   end
+  #
+  #   demo = Demo.new
+  #   demo.demo_method
+  #   # => am I decorated?
+  #   # => 'Demo' has 'demo_method' decorated
+  #
+  # @api public
+  def around
+    @around_method ||= Set.new
+    @around_set = true
+  end
+
   private
 
   ##
@@ -97,15 +134,20 @@ module DecoratorDsl
   # @return [Void]
   #
   # @api private
-  def method_added(name)
+  def method_added(name) # rubocop:disable Metrics/MethodLength
     if before_set
       @before_set = false
       @before_method << name
     end
 
-    return unless after_set
+    if after_set
+      @after_set = false
+      @after_method << name
+    end
 
-    @after_set = false
-    @after_method << name
+    return unless around_set
+
+    @around_set = false
+    @around_method << name
   end
 end

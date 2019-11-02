@@ -48,29 +48,28 @@ module Decorations
   #   # => am I decorated?
   #
   # @api public
-  def decorate(klass, *args)
+  def decorate(klass, *args, &block)
     @decorators ||= []
-    @decorators << [klass, args]
+    @decorators << { klass: klass, args: args, block: block }
   end
 
   private
 
   ##
-  # Appends the decorators to the decorated_methods hash
+  # Builds an array of decorators for the method
   #
   # @param name [Symbol] the method name being decorated
-  # @param decorators [Array<Decorator>] the decorators defined
-  # @param decorated_methods [Hash] the decorated methods for the class
   #
-  # @return [Void]
+  # @return [Array<Decorator>]
   #
   # @api private
-  def append_decorations(name, decorators, decorated_methods)
-    decorators.each do |klass, args|
-      decoration = klass.new(*args)
-      decoration.__send__(:decorated_class=, self)
-      decoration.__send__(:decorated_method=, instance_method(name))
-      decorated_methods[name] << decoration
+  def build_decorators(name)
+    decorated_methods[name].map do |decoration|
+      decorator = decoration[:klass].new(*decoration[:args], &decoration[:block])
+      decorator.__send__(:decorated_class=, decoration[:decorated_class])
+      decorator.__send__(:decorated_method=, decoration[:decorated_method])
+
+      decorator
     end
   end
 
@@ -83,16 +82,20 @@ module Decorations
   #
   # @api private
   def method_added(name)
-    return if @disabled
     return unless @decorators
 
     @decorated_methods ||= Hash.new { |h, k| h[k] = [] }
-    append_decorations(name, @decorators, @decorated_methods)
+    @decorated_methods[name] = @decorators.map do |decorator|
+      decorator.merge(
+        decorated_class: self,
+        decorated_method: instance_method(name)
+      )
+    end
     @decorators = nil
 
     class_eval <<-RUBY_EVAL, __FILE__, __LINE__ + 1
       def #{name}(*args, &block)
-        chain = self.class.decorated_methods[#{name.inspect}].dup
+        chain = self.class.__send__(:build_decorators, #{name.inspect})
         Decorator.new.__send__(:call, self, chain, *args, &block)
       end
     RUBY_EVAL

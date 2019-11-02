@@ -3,7 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/decorations.svg)](https://badge.fury.io/rb/decorations)
 [![Build Status](https://travis-ci.org/watmin/Ruby-decorations.svg?branch=master)](https://travis-ci.org/watmin/Ruby-decorations)
 
-Python like decorators for Ruby. Inspired by Rack and previous attempts at decorations
+Python like decorators for Ruby. Inspired by Rack, Rails and previous attempts at decorations. Only uses Ruby's standard library.
 
 ## Installation
 
@@ -44,10 +44,30 @@ class LoggingDecorator < Decorator
   end
 end
 
+class LoggingAroundDecorator < Decorator
+  around
+  def print_start_finish
+    @start_time = Time.now
+    puts "[#{@start_time}] #{decorated_class}.#{decorated_method.name} was called"
+
+    ret = yield
+
+    end_time = Time.now
+    puts "[#{end_time}] #{decorated_class}.#{decorated_method.name} has finished. Took #{end_time - @start_time} seconds"
+
+    ret
+  end
+end
+
 class Application
   extend Decorations
 
   decorate LoggingDecorator
+  def perform_task(a, b: 2)
+    a + b
+  end
+
+  decorate LoggingAroundDecorator
   def perform_task(a, b: 2)
     a + b
   end
@@ -62,6 +82,11 @@ app = Application.new
 app.perform_task(2, b: 2)
 # [2019-11-01 19:50:59 -0700] Application.perform_task was called
 # [2019-11-01 19:50:59 -0700] Application.perform_task has finished. Took 3.51e-05 seconds
+# => 4
+
+app.perform_another_task(2, b: 2)
+# [2019-11-02 15:32:19 -0700] Application.perform_another_task was called
+# [2019-11-02 15:32:19 -0700] Application.perform_another_task has finished. Took 3.04e-05 seconds
 # => 4
 
 app.perform_task_with_a_block { puts 'in a block' }
