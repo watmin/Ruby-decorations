@@ -71,7 +71,7 @@ app.perform_task_with_a_block { puts 'in a block' }
 
 You can also pass in parameters to decorator methods:
 
-```
+```ruby
 class AnotherDecorator < Decorator
   def initialize(some, params)
     @some = some
