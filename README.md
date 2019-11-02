@@ -2,7 +2,6 @@
 
 [![Gem Version](https://badge.fury.io/rb/decorations.svg)](https://badge.fury.io/rb/decorations)
 [![Build Status](https://travis-ci.org/watmin/Ruby-decorations.svg?branch=master)](https://travis-ci.org/watmin/Ruby-decorations)
-[![Coverage Status](https://coveralls.io/repos/github/watmin/Ruby-decorations/badge.svg?branch=master)](https://coveralls.io/github/watmin/Ruby-decorations?branch=master)
 
 Python like decorators for Ruby. Inspired by Rack and previous attempts at decorations
 
@@ -24,22 +23,22 @@ Or install it yourself as:
 
 ## Usage
 
-Create a class that will have decorated methods and create decator classes to before actions.
-
-The decorator class must:
-* implement #call
-* must invoke call\_next(this, chain, \*args)
-* must return the result of call\_next.
+Create a class that will have decorated methods and create decator classes to be executed around the decorated method.
 
 ```ruby
 require 'decorations'
 
 class LoggingDecorator < Decorator
-  def call(this, chain, *args)
-    puts "[#{Time.now}] #{decorated_class}.#{decorated_method.name} was called"
-    result = call_next(this, chain, *args)
-    puts "[#{Time.now}] #{decorated_class}.#{decorated_method.name} has finished"
-    result
+  before
+  def print_started
+    @start_time = Time.now
+    puts "[#{@start_time}] #{decorated_class}.#{decorated_method.name} was called"
+  end
+
+  after
+  def print_finished
+    end_time = Time.now
+    puts "[#{end_time}] #{decorated_class}.#{decorated_method.name} has finished. Took #{end_time - @start_time} seconds"
   end
 end
 
@@ -47,16 +46,72 @@ class Application
   extend Decorations
 
   decorate LoggingDecorator
-  def perform_task
-    2 + 2
+  def perform_task(a, b: 2)
+    a + b
+  end
+
+  decorate LoggingDecorator
+  def perform_task_with_a_block
+    yield
   end
 end
 
 app = Application.new
-app.perform_task
-# => [2019-10-31 02:00:31 -0700] Application.perform_task was called
-# => [2019-10-31 02:00:31 -0700] Application.perform_task has finished
+app.perform_task(2, b: 2)
+# [2019-11-01 19:50:59 -0700] Application.perform_task was called
+# [2019-11-01 19:50:59 -0700] Application.perform_task has finished. Took 3.51e-05 seconds
 # => 4
+
+app.perform_task_with_a_block { puts 'in a block' }
+# [2019-11-01 19:55:37 -0700] Application.perform_task_with_a_block was called
+# in a block
+# [2019-11-01 19:55:37 -0700] Application.perform_task_with_a_block has finished. Took 5.32e-05 seconds
+# => nil
+```
+
+You can also pass in parameters to decorator methods:
+
+```
+class AnotherDecorator < Decorator
+  def initialize(some, params)
+    @some = some
+    @params = params
+  end
+
+  before
+  def puts_some
+    puts @some
+  end
+
+  after
+  def puts_params
+    puts @params
+  end
+end
+
+class AnotherDemo
+  extends Decorations
+
+  decorate AnotherDecorator, 'value 1', 'value 2'
+  def another_method
+    puts 'running puts in yet another method'
+  end
+end
+
+demo = AnotherDemo.new
+demo.another_method
+# value 1
+# running puts in yet another method
+# value 2
+# => nil
+
+```
+
+When testing decorated methods, execute `Decorations.disable` before requiring your source files. In your spec\_helper.rb add the following lines before your library is loaded:
+
+```ruby
+require 'decorations'
+Decorations.disable
 ```
 
 ## Development

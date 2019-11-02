@@ -3,8 +3,14 @@
 require 'decorations'
 
 class SpecDecorationsDecorator < Decorator
-  def call(this, chain, *args)
-    call_next(this, chain, *args)
+  before
+  def before_hook
+    puts 'in the before hook'
+  end
+
+  after
+  def after_hook
+    puts 'in the after hook'
   end
 end
 

@@ -21,6 +21,19 @@ module Decorations
   end
 
   ##
+  # Disables injecting decorations. Necessary for testing decorated methods
+  #
+  # @return [Void]
+  #
+  # @example
+  #   Decorations.disable
+  #
+  # @api public
+  def self.disable
+    @disabled = true
+  end
+
+  ##
   # Decorates a method execute's the klass' #call method around the decorated method
   #
   # @return [Void]
@@ -67,7 +80,10 @@ module Decorations
   # @api private
   def append_decorations(name, decorators, decorated_methods)
     decorators.each do |klass, args|
-      decorated_methods[name] << klass.new(self, instance_method(name), *args)
+      decoration = klass.new(*args)
+      decoration.__send__(:decorated_class=, self)
+      decoration.__send__(:decorated_method=, instance_method(name))
+      decorated_methods[name] << decoration
     end
   end
 
@@ -80,6 +96,7 @@ module Decorations
   #
   # @api private
   def method_added(name)
+    return if @disabled
     return unless @decorators
 
     @decorated_methods ||= Hash.new { |h, k| h[k] = [] }
@@ -87,9 +104,9 @@ module Decorations
     @decorators = nil
 
     class_eval <<-RUBY_EVAL, __FILE__, __LINE__ + 1
-      def #{name}(*args, &blk)
+      def #{name}(*args, &block)
         chain = self.class.decorated_methods[#{name.inspect}].dup
-        Decorator.new(self, :method_added).call_next(self, chain, *args, &blk)
+        Decorator.new.__send__(:call, self, chain, *args, &block)
       end
     RUBY_EVAL
   end
