@@ -21,19 +21,6 @@ module Decorations
   end
 
   ##
-  # Disables injecting decorations. Necessary for testing decorated methods
-  #
-  # @return [Void]
-  #
-  # @example
-  #   Decorations.disable
-  #
-  # @api public
-  def self.disable
-    @disabled = true
-  end
-
-  ##
   # Decorates a method execute's the klass' #call method around the decorated method
   #
   # @return [Void]

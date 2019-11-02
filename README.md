@@ -23,6 +23,8 @@ Or install it yourself as:
 
 ## Usage
 
+**Note:** You can only decorate instance methods. The Ruby callback hook is only executed on instance method definions, not class methods.
+
 Create a class that will have decorated methods and create decator classes to be executed around the decorated method.
 
 ```ruby
@@ -104,14 +106,6 @@ demo.another_method
 # running puts in yet another method
 # value 2
 # => nil
-
-```
-
-When testing decorated methods, execute `Decorations.disable` before requiring your source files. In your spec\_helper.rb add the following lines before your library is loaded:
-
-```ruby
-require 'decorations'
-Decorations.disable
 ```
 
 ## Development
