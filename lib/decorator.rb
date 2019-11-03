@@ -87,11 +87,11 @@ class Decorator
   # @api private
   def execute_around_methods(next_caller)
     arounds = self.class.__send__(:around_method)
-    if arounds.is_a?(Set)
+    if arounds.nil?
+      ret = next_caller.call
+    else
       ret = nil
       arounds.each { |method_name| ret = __send__(method_name) { next_caller.call } }
-    else
-      ret = next_caller.call
     end
 
     ret

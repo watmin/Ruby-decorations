@@ -68,7 +68,7 @@ class Application
   end
 
   decorate LoggingAroundDecorator
-  def perform_task(a, b: 2)
+  def perform_another_task(a, b: 2)
     a + b
   end
 
